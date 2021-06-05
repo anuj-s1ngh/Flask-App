@@ -1,10 +1,10 @@
-{% extends "layout.html" %}
+{% extends "main/layout.html" %}
 {% block content %}
     <div>
         <form method="post" action="">
             {{ form.hidden_tag() }}
             <fieldset class="form-group">
-                <legend class="border-bottom mb-4  mt-4"><strong>Request Verify Email</strong></legend>
+                <legend class="border-bottom mb-4  mt-4"><strong>Request Email Verification</strong></legend>
                 <div class="form-group">
                     {{ form.email.label(class="form-control-label mt-3") }}
 

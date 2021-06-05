@@ -39,15 +39,17 @@ def save_profile_image(form_image):
 
 
 def send_reset_password_link(user):
-    token = user.get_reset_password_token()
+    token = user.get_mail_token()
     msg = Message(
-        subject="Password Reset Link",
+        subject="Password Reset Request",
         sender="dev@flaskapp",
         recipients=[user.email]
     )
     msg.body = f"""To Reset Your Password, Visit the following link:
 
 {url_for('user_blueprint.reset_password', token=token, _external=True)}
+
+If The Link Doesn't Work Paste In Browser And Continue.
 
 If This Request Was Made By Mistake Or You Are The Wrong Person To Get This Mail, Then Simply Ignore.
 
@@ -62,15 +64,40 @@ Contact: dev@flaskapp
 
 
 def send_verify_email_link(user):
-    token = user.get_verify_email_token()
+    token = user.get_mail_token()
     msg = Message(
-        subject="Verify Email Link",
+        subject="Verify Email Request",
         sender="dev@flaskapp",
         recipients=[user.email]
     )
     msg.body = f"""To Verify Your Email, Visit the following link:
 
 {url_for('user_blueprint.verify_email', token=token, _external=True)}
+
+If The Link Doesn't Work Paste In Browser And Continue.
+
+If You Are The Wrong Person To Get This Mail, Then Simply Ignore.
+
+Regards,
+Developer Team at FlaskApp
+
+Contact: dev@flaskapp
+"""
+    mail.send(msg)
+
+
+def send_change_email_link(user, new_email):
+    token = user.get_mail_token()
+    msg = Message(
+        subject="Change Email Request",
+        sender="dev@flaskapp",
+        recipients=[new_email]
+    )
+    msg.body = f"""To Change Your Email and Verify New Email, Visit the following link:
+
+{url_for('user_blueprint.change_email', token=token, _external=True)}
+
+If The Link Doesn't Work Paste In Browser And Continue.
 
 If You Are The Wrong Person To Get This Mail, Then Simply Ignore.
 

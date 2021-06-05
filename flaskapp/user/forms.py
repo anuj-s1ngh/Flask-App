@@ -32,6 +32,12 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Login')
 
 
+class AccountForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired(), Length(min=2, max=50)])
+    email = StringField('Email', validators=[DataRequired(), Email(), Length(min=6, max=100)])
+    submit = SubmitField('Edit Profile')
+
+
 class UpdateAccountForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired(), Length(min=2, max=50)])
     email = StringField('Email', validators=[DataRequired(), Email(), Length(min=6, max=100)])
@@ -71,7 +77,7 @@ class ResetPasswordForm(FlaskForm):
 
 class RequestVerifyEmailForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email(), Length(min=6, max=100)])
-    submit = SubmitField('Request Verify Email')
+    submit = SubmitField('Send Request')
 
     def validate_email(self, email):
         user = User.query.filter_by(email=email.data).first()
@@ -81,3 +87,25 @@ class RequestVerifyEmailForm(FlaskForm):
 
 class VerifyEmailForm(FlaskForm):
     submit = SubmitField('Verify Email')
+
+
+class RequestChangeEmailForm(FlaskForm):
+    email = StringField('Email', validators=[DataRequired(), Email(), Length(min=6, max=100)])
+    submit = SubmitField('Send Request')
+
+    def validate_email(self, email):
+        user = User.query.filter_by(email=email.data).first()
+        if user:
+            raise ValidationError('Email is already associated with an account.')
+
+
+class ChangeEmailForm(FlaskForm):
+    submit = SubmitField('Change Email')
+
+
+class ChangePasswordForm(FlaskForm):
+    current_password = PasswordField('Password', validators=[DataRequired(), Length(min=4, max=50)])
+    new_password = PasswordField('Password', validators=[DataRequired(), Length(min=4, max=50)])
+    confirm_new_password = PasswordField('Confirm Password',
+                                     validators=[DataRequired(), Length(min=4, max=50), EqualTo('new_password')])
+    submit = SubmitField('Change Password')

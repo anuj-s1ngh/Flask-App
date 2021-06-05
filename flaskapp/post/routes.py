@@ -12,21 +12,25 @@ post_blueprint = Blueprint('post_blueprint', __name__)
 @post_blueprint.route('/post/create', methods=['GET', 'POST'])
 @login_required
 def create_post():
-    form = CreatePostForm()
-    if form.validate_on_submit():
-        post = Post(title=form.title.data, content=form.content.data, author=current_user)
-        db.session.add(post)
-        db.session.commit()
-        flash("Your Post has been submitted successfully.", 'success')
-        return redirect(url_for('main_blueprint.home'))
-    flash("When You Are Creating New Post Please Follow Community Guidelines.", 'primary')
-    return render_template("create_post.html", title="Create Post", form=form)
+    if current_user.is_email_verified:
+        form = CreatePostForm()
+        if form.validate_on_submit():
+            post = Post(title=form.title.data, content=form.content.data, author=current_user)
+            db.session.add(post)
+            db.session.commit()
+            flash("Your Post has been submitted successfully.", 'success')
+            return redirect(url_for('main_blueprint.home'))
+        flash("When You Are Creating New Post Please Follow Community Guidelines.", 'primary')
+        return render_template("post/create_post.html", title="Create Post", form=form)
+    else:
+        flash(f"To Access this Page You Must Verify Your Email.", 'warning')
+        return redirect(url_for('user_blueprint.login'))
 
 
 @post_blueprint.route('/post/<int:post_id>')
 def see_post(post_id):
     post = Post.query.get_or_404(post_id)
-    return render_template("see_post.html", title=post.title, post=post)
+    return render_template("post/see_post.html", title=post.title, post=post)
 
 
 @post_blueprint.route('/post/<int:post_id>/update', methods=['GET', 'POST'])
@@ -45,7 +49,7 @@ def update_post(post_id):
     elif request.method == 'GET':
         form.title.data = post.title
         form.content.data = post.content
-    return render_template("update_post.html", title=f"Update Post", form=form)
+    return render_template("post/update_post.html", title=f"Update Post", form=form)
 
 
 @post_blueprint.route('/post/<int:post_id>/delete', methods=['POST'])

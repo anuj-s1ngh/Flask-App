@@ -1,0 +1,80 @@
+{% extends "main/layout.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% block content %}
+    <div>
+        <form method="post" action="">
+            {{ form.hidden_tag() }}
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4  mt-4"><strong>Join Today</strong></legend>
+                <div class="form-group">
+<!--                    {{ form.username.label(class="form-control-label mt-3") }}-->
+
+                    {% if form.username.errors %}
+                        {{ form.username(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.username.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ wtf.form_field(form.username, class="form-control form-control-lg mb-3", placeholder="Enter Username") }}
+                    {% endif %}
+
+                </div>
+                <div class="form-group">
+<!--                    {{ form.email.label(class="form-control-label mt-3") }}-->
+
+                    {% if form.email.errors %}
+                        {{ form.email(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.email.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ wtf.form_field(form.email, class="form-control form-control-lg mb-3", placeholder="Enter Your Email") }}
+                    {% endif %}
+
+                </div>
+                <div class="form-group">
+<!--                    {{ form.password.label(class="form-control-label mt-3") }}-->
+
+                    {% if form.password.errors %}
+                        {{ form.password(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.password.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ wtf.form_field(form.password, class="form-control form-control-lg mb-3", placeholder="Enter Password") }}
+                    {% endif %}
+
+                </div>
+                <div class="form-group">
+<!--                    {{ form.confirm_password.label(class="form-control-label mt-3") }}-->
+
+                    {% if form.confirm_password.errors %}
+                        {{ form.confirm_password(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.confirm_password.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ wtf.form_field(form.confirm_password, class="form-control form-control-lg mb-3", placeholder="Enter Same Password Again") }}
+                    {% endif %}
+
+                </div>
+            </fieldset>
+            <div class="form-group">
+                {{ form.submit(class="btn btn-outline-primary mt-2 mb-3") }}
+            </div>
+        </form>
+    </div>
+    <div class="border-top pt-3 mb-3">
+        <small class="text-muted">
+            Already have an Account. <a class="ml-2" href="{{ url_for('user_blueprint.login') }}">Log In</a>
+        </small>
+    </div>
+{% endblock content %}

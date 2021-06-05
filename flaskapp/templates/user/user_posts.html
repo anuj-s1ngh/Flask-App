@@ -1,16 +1,21 @@
-{% extends "layout.html" %}
+{% extends "main/layout.html" %}
 {% block content %}
-    <h1 class="mb-3">Posts By : {{ user.username }} ({{ posts.total }})</h1>
+    <img class="rounded-circle mt-3" src="{{ url_for('static', filename='MEDIA/IMG/PROFILE_IMG/' + user.profile_image) }}">
+    <h4 class="mb-3">
+        <a class="link-info" href="{{ url_for('user_blueprint.user_public_profile', username=user.username) }}">
+            @{{ user.username }}
+        </a>
+    </h4>
+    <p class="text-muted mb-3">Total Posts : {{ posts.total }}</p>
+
     {% for post in posts.items %}
-        <article class="media content-section mt-3 mb-3">
+        <article class="media content-section mt-3">
             <div class="media-body">
-                <img class="rounded-circle article-img" src="{{ url_for('static', filename='MEDIA/IMG/PROFILE_IMG/' + post.author.profile_image) }}">
                 <div class="article-metadata mb-1">
-                    <a class="mr-3" href="{{ url_for('user_blueprint.user_posts', username=post.author.username) }}">{{ post.author.username }}</a>
-                    <small class="text-muted">{{ post.date_posted.strftime("%Y-%m-%d %H:%M") }}</small>
+                    <small class="text-muted">{{ post.date_posted.strftime("%Y-%m-%d") }}</small>
                 </div>
-                <H3><a class="article-title" href="{{ url_for('post_blueprint.see_post', post_id=post.id) }}"> {{ post.title }} </a></H3>
-                <h6 class="article-content">{{ post.content }}</h6>
+                <H3><a class="article-title link-primary" href="{{ url_for('post_blueprint.see_post', post_id=post.id) }}"> {{ post.title }} </a></H3>
+                <p class="article-content">{{ post.content }}</p>
             </div>
         </article>
         <br>
