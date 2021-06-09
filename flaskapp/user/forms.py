@@ -1,16 +1,20 @@
 from flask_login import current_user
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
-from wtforms import StringField, PasswordField, SubmitField, BooleanField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 from flaskapp.models import User
 
 
+class EmptyForm(FlaskForm):
+    submit = SubmitField('Submit')
+
+
 class RegistrationForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired(), Length(min=2, max=50)])
-    email = StringField('Email', validators=[DataRequired(), Email(), Length(min=6, max=100)])
-    password = PasswordField('Password', validators=[DataRequired(), Length(min=4, max=50)])
-    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), Length(min=4, max=50), EqualTo('password')])
+    username = StringField('Username', validators=[DataRequired(), Length(min=2, max=200)])
+    email = StringField('Email', validators=[DataRequired(), Email(), Length(min=6, max=200)])
+    password = PasswordField('Password', validators=[DataRequired(), Length(min=4, max=200)])
+    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), Length(min=4, max=100), EqualTo('password')])
     submit = SubmitField('Register')
 
     def validate_username(self, username):
@@ -24,7 +28,6 @@ class RegistrationForm(FlaskForm):
             raise ValidationError('Email is already associated with an account.')
 
 
-
 class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired(), Length(min=4, max=50)])
@@ -33,15 +36,25 @@ class LoginForm(FlaskForm):
 
 
 class AccountForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired(), Length(min=2, max=50)])
-    email = StringField('Email', validators=[DataRequired(), Email(), Length(min=6, max=100)])
+    about = StringField('About', validators=[Length(min=0, max=1000)])
+    username = StringField('Username', validators=[DataRequired(), Length(min=2, max=200)])
+    email = StringField('Email', validators=[DataRequired(), Email(), Length(min=6, max=200)])
+    first_name = StringField('First Name', validators=[Length(min=0, max=200)])
+    middle_name = StringField('Middle Name', validators=[Length(min=0, max=200)])
+    last_name = StringField('Last Name', validators=[Length(min=0, max=200)])
+    current_profession = StringField('Current Profession', validators=[Length(min=0, max=200)])
     submit = SubmitField('Edit Profile')
 
 
 class UpdateAccountForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired(), Length(min=2, max=50)])
-    email = StringField('Email', validators=[DataRequired(), Email(), Length(min=6, max=100)])
-    profile_image = FileField('Update Profile Image', validators=[FileAllowed(['jpg', 'png', 'jpeg'])])
+    profile_image = FileField('Profile Image', validators=[FileAllowed(['jpg', 'png', 'jpeg'])])
+    about = StringField('About', validators=[Length(min=0, max=1000)])
+    username = StringField('Username', validators=[DataRequired(), Length(min=2, max=200)])
+    email = StringField('Email', validators=[DataRequired(), Email(), Length(min=6, max=200)])
+    first_name = StringField('First Name', validators=[Length(min=0, max=200)])
+    middle_name = StringField('Middle Name', validators=[Length(min=0, max=200)])
+    last_name = StringField('Last Name', validators=[Length(min=0, max=200)])
+    current_profession = StringField('Current Profession', validators=[Length(min=0, max=200)])
     submit = SubmitField('Update')
 
     def validate_username(self, username):
@@ -55,7 +68,6 @@ class UpdateAccountForm(FlaskForm):
             user = User.query.filter_by(email=email.data).first()
             if user:
                 raise ValidationError('Email is already associated with an account.')
-
 
 
 class RequestResetPasswordForm(FlaskForm):
@@ -109,3 +121,9 @@ class ChangePasswordForm(FlaskForm):
     confirm_new_password = PasswordField('Confirm Password',
                                      validators=[DataRequired(), Length(min=4, max=50), EqualTo('new_password')])
     submit = SubmitField('Change Password')
+
+
+class CloseAccountForm(FlaskForm):
+    closing_reason = TextAreaField('Reason For Closing Account', validators=[DataRequired()])
+    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), Length(min=4, max=50)])
+    submit = SubmitField('Close Account')

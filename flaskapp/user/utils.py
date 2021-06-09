@@ -1,12 +1,43 @@
+# import code for encoding urls and generating md5 hashes
+import hashlib
 import os
 import secrets
+import string
+import urllib
+
 from PIL import Image
+from flask import current_app
 from flask import url_for
 from flask_login import current_user
 from flask_mail import Message
 from werkzeug.utils import secure_filename
+
 from flaskapp import ALLOWED_EXTENSIONS, mail
-from flask import current_app
+
+
+def generate_gravatar(random_string=None):
+    # Set your variables here
+    # email = "someone@somewhere.com"
+    # default = "https://www.example.com/default.jpg"
+    if not random_string:
+        random_string = get_random_string()
+    size = 125
+
+    # construct the url
+    gravatar_url = "https://www.gravatar.com/avatar/" + hashlib.md5(random_string.lower().encode('utf-8')).hexdigest() + "?"
+    gravatar_url += urllib.parse.urlencode({'s': str(size)})
+    # gravatar_url += urllib.urlencode({'d': default, 's': str(size)})
+
+    return gravatar_url
+
+
+def get_random_string(string_length=16):
+    num = string_length  # define the length of the string
+    # define the secrets.choice() method and pass the string.ascii_letters + string.digits as an parameters.
+    res = ''.join(secrets.choice(string.ascii_letters + string.digits + string.punctuation) for x in range(num))
+    # Print the Secure string with the combonation of letters, digits and punctuation
+    # print("Secure random string is :" + str(res))
+    return str(res)
 
 
 def allowed_file(filename):

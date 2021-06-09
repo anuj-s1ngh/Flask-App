@@ -2,6 +2,9 @@
 {% block content %}
 <article class="media content-section mt-3">
     <div class="media-body">
+<!--        <svg data-jdenticon-value="{{ current_user.username }}" width="80" height="80">-->
+<!--            Fallback text or image for browsers not supporting inline svg.-->
+<!--        </svg>-->
         <img class="rounded-circle article-img"
              src="{{ url_for('static', filename='MEDIA/IMG/PROFILE_IMG/' + post.author.profile_image) }}">
         <div class="article-metadata mb-1">
@@ -17,7 +20,7 @@
                 </a>
                 <!-- Button trigger modal -->
                 <button type="button" class="btn btn-danger btn-sm mt-1 mb-1" data-bs-toggle="modal"
-                        data-bs-target="#deleteModal">
+                        data-bs-target="#deletePostModal">
                     Delete
                 </button>
             </div>
@@ -26,12 +29,12 @@
 </article>
 
 <!-- Modal -->
-<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel"
+<div class="modal fade" id="deletePostModal" tabindex="-1" aria-labelledby="deletePostModalLabel"
      aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="deleteModalLabel">Confirm Delete Post!</h5>
+                <h5 class="modal-title" id="deletePostModalLabel">Confirm Delete Post!</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-footer">

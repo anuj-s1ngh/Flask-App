@@ -3,6 +3,9 @@
     {% for post in posts.items %}
         <article class="media content-section mt-3 mb-3">
             <div class="media-body">
+<!--                <svg data-jdenticon-value="{{ current_user.username }}" width="125" height="125">-->
+<!--                    Fallback text or image for browsers not supporting inline svg.-->
+<!--                </svg>-->
                 <a href="{{ url_for('user_blueprint.user_public_profile', username=post.author.username) }}">
                     <img class="rounded-circle article-img" src="{{ url_for('static', filename='MEDIA/IMG/PROFILE_IMG/' + post.author.profile_image) }}">
                 </a>

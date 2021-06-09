@@ -1,9 +1,38 @@
 {% extends "main/layout.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
 {% block content %}
     <img class="rounded-circle mt-3" src="{{ url_for('static', filename='MEDIA/IMG/PROFILE_IMG/' + user.profile_image) }}">
-    <h4 class="mb-3">@{{ user.username }}</h4>
+    {% if user.first_name and user.middle_name and user.last_name %}
+        <h4>{{ user.first_name.capitalize() }} {{ user.middle_name.capitalize() }} {{ user.last_name.capitalize() }}</h4>
+    {% elif user.first_name and user.last_name %}
+        <h4>{{ user.first_name.capitalize() }} {{ user.last_name.capitalize() }}</h4>
+    {% else %}
+        <h4>@{{ user.username }}</h4>
+    {% endif %}
+    {% if user.about %}
+        <p>{{ user.about }}</p>
+    {% endif %}
     <p class="text-muted mb-3">Date Joined : {{ user.date_joined.strftime("%Y-%m-%d") }}</p>
     <p class="text-muted mb-3">Total Posts : {{ posts.total }}</p>
+
+    {% if current_user.is_authenticated %}
+        {% if not current_user.is_following(user) %}
+            <p>
+                <form action="{{ url_for('user_blueprint.follow', username=user.username) }}" method="post">
+                    {{ form.hidden_tag() }}
+                    {{ wtf.form_field(form.submit, value="Follow", class="btn btn-sm btn-primary") }}
+                </form>
+            </p>
+        {% else %}
+            <p>
+                <form action="{{ url_for('user_blueprint.unfollow', username=user.username) }}" method="post">
+                    {{ form.hidden_tag() }}
+                    {{ wtf.form_field(form.submit, value="Unfollow", class="btn btn-sm btn-danger") }}
+                </form>
+            </p>
+        {% endif %}
+    {% endif %}
+
     {% for post in posts.items %}
         <article class="media content-section mt-3">
             <div class="media-body">

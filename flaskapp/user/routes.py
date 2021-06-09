@@ -1,16 +1,18 @@
 from flask import Blueprint
 from flask import render_template, url_for, flash, redirect, request
 from flask_login import login_user, current_user, logout_user, login_required
-
+from wtforms.validators import ValidationError
 from flaskapp import bcrypt, db
 from flaskapp.user.forms import (RegistrationForm, LoginForm, UpdateAccountForm, RequestResetPasswordForm,
                                  ResetPasswordForm, RequestVerifyEmailForm, VerifyEmailForm, AccountForm,
-                                 RequestChangeEmailForm, ChangeEmailForm, ChangePasswordForm)
+                                 RequestChangeEmailForm, ChangeEmailForm, ChangePasswordForm, CloseAccountForm,
+                                 EmptyForm)
 from flaskapp.models import User, Post
 from flaskapp.user.utils import allowed_file, save_profile_image, send_reset_password_link, send_verify_email_link, \
     send_change_email_link
 
 from flaskapp.config import posts_per_page
+from flaskapp.user.utils import get_random_string
 
 
 user_blueprint = Blueprint('user_blueprint', __name__)
@@ -24,32 +26,37 @@ def register():
     form = RegistrationForm()
     if form.validate_on_submit():
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-        user = User(username=form.username.data, email=form.email.data, password=hashed_password)
+        random_identicon_string = User.generate_random_identicon_image()
+
+        user = User(
+            username=form.username.data,
+            email=form.email.data,
+            password=hashed_password,
+            profile_identicon_unique_string=random_identicon_string,
+        )
         db.session.add(user)
         db.session.commit()
+        login_user(user, remember=True)
 
-        flash(f'Account Created for {form.username.data}.', 'success')
+        flash(f'Account Created for {form.username.data.capitalize()}.', 'success')
         return redirect(url_for('user_blueprint.request_verify_email', email=form.email.data))
 
     elif request.method == 'POST':
-        flash(f'Account Creation Failed for {form.username.data}. Please, Try Again!', 'danger')
+        flash(f'Account Creation Failed for {form.username.data.capitalize()}. Please, Try Again!', 'danger')
 
     return render_template("user/register.html", title="Register", form=form)
 
 
 @user_blueprint.route("/login", methods=['GET', 'POST'])
 def login():
-    if current_user.is_authenticated:
-        return redirect(url_for('main_blueprint.home'))
-
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
 
         if user and bcrypt.check_password_hash(user.password, form.password.data):
+            login_user(user, remember=form.remember_me.data)
+            flash("You Are Now Logged In.", 'success')
             if user.is_email_verified:
-                login_user(user, remember=form.remember_me.data)
-                flash("You Are Now Logged In.", 'success')
                 next_page = request.args.get('next')
                 if next_page:
                         return redirect(next_page)
@@ -69,37 +76,46 @@ def login():
 @user_blueprint.route('/logout')
 @login_required
 def logout():
-    logout_user()
-    flash("You are Logged Out.", 'danger')
-    return redirect(url_for('main_blueprint.home'))
+    if current_user.is_authenticated:
+        logout_user()
+        flash("You are Logged Out.", 'danger')
+        return redirect(url_for('main_blueprint.home'))
 
 
 @user_blueprint.route('/account', methods=['GET', 'POST'])
 @login_required
 def account():
-    if current_user.is_email_verified:
+    if current_user.is_authenticated:
         form = AccountForm()
 
         if form.validate_on_submit():
             return redirect(url_for('user_blueprint.update_account'))
 
         if request.method == 'GET':
-            flash(f"Welcome {current_user.username}", 'success')
+            if current_user.first_name:
+                flash(f"Welcome {current_user.first_name.capitalize()}", 'success')
+            else:
+                flash(f"Welcome {current_user.username.capitalize()}", 'success')
+            form.about.data = current_user.about
             form.username.data = current_user.username
             form.email.data = current_user.email
+            form.first_name.data = current_user.first_name
+            form.middle_name.data = current_user.middle_name
+            form.last_name.data = current_user.last_name
+            form.current_profession.data = current_user.current_profession
 
         image_file = url_for('static', filename=f'MEDIA/IMG/PROFILE_IMG/{current_user.profile_image}')
         return render_template("user/account.html", title="Account", image_file=image_file, form=form)
 
     else:
-        flash(f"To Access this Page You Must Verify Your Email.", 'warning')
+        flash(f"To Access this Page You Must Logged In.", 'warning')
         return redirect(url_for('user_blueprint.login'))
 
 
 @user_blueprint.route('/account/update', methods=['GET', 'POST'])
 @login_required
 def update_account():
-    if current_user.is_email_verified:
+    if current_user.is_authenticated:
         form = UpdateAccountForm()
 
         if form.validate_on_submit() and ((current_user.username != form.username.data) and (current_user.email != form.email.data) and (current_user.profile_image != form.profile_image.data)):
@@ -110,7 +126,12 @@ def update_account():
                 profile_image_name = save_profile_image(form.profile_image.data)
                 current_user.profile_image = profile_image_name
 
+            current_user.about = form.about.data
             current_user.username = form.username.data
+            current_user.first_name = form.first_name.data
+            current_user.middle_name = form.middle_name.data
+            current_user.last_name = form.last_name.data
+            current_user.current_profession = form.current_profession.data
             db.session.commit()
 
             if current_user.email != form.email.data:
@@ -123,12 +144,43 @@ def update_account():
             flash(f"You Can Update Your Account Info From Here.", 'primary')
             form.username.data = current_user.username
             form.email.data = current_user.email
+            form.first_name.data = current_user.first_name
+            form.middle_name.data = current_user.middle_name
+            form.last_name.data = current_user.last_name
+            form.current_profession.data = current_user.current_profession
 
         image_file = url_for('static', filename=f'MEDIA/IMG/PROFILE_IMG/{current_user.profile_image}')
         return render_template("user/update_account.html", title="Account", image_file=image_file, form=form)
 
     else:
-        flash(f"To Access this Page You Must Verify Your Email.", 'warning')
+        flash(f"To Access this Page You Must Logged In", 'warning')
+        return redirect(url_for('user_blueprint.login'))
+
+
+@user_blueprint.route('/account/close', methods=['GET', 'POST'])
+@login_required
+def close_account():
+    if current_user.is_authenticated:
+        form = CloseAccountForm()
+        user = User.query.filter_by(email=current_user.email).first()
+        posts = Post.query.filter_by(author=user).all()
+        if request.method == "GET":
+            flash(f"Please note that after deletion of your account your all posts will also be deleted.", 'success')
+            return render_template("user/close_account.html", title="Close Account", form=form)
+        elif form.validate_on_submit() and user and bcrypt.check_password_hash(user.password, form.confirm_password.data):
+            if posts:
+                for post in posts:
+                    db.session.delete(post)
+            logout_user()
+            db.session.delete(user)
+            db.session.commit()
+            flash(f"Your Account Has Been Closed.", 'success')
+            return redirect(url_for('main_blueprint.home'))
+        else:
+            flash(f"Invalid Password, Try Again!", 'warning')
+            return render_template("user/close_account.html", title="Close Account", form=form)
+    else:
+        flash(f"To Access this Page You Must Logged In.", 'warning')
         return redirect(url_for('user_blueprint.login'))
 
 
@@ -151,7 +203,8 @@ def user_public_profile(username):
         .filter_by(author=user)\
         .order_by(Post.date_posted.desc())\
         .paginate(page=page, per_page=posts_per_page)
-    return render_template("user/user_public_profile.html", title=user.username, posts=posts, user=user)
+    form = EmptyForm()
+    return render_template("user/user_public_profile.html", title=user.username, posts=posts, user=user, form=form)
 
 
 @user_blueprint.route('/request_reset_password', methods=['GET', 'POST'])
@@ -190,10 +243,8 @@ def reset_password(token):
 
 
 @user_blueprint.route('/request_verify_email/<email>', methods=['GET', 'POST'])
+@login_required
 def request_verify_email(email):
-    if current_user.is_authenticated:
-        return redirect(url_for('main_blueprint.home'))
-
     form = RequestVerifyEmailForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
@@ -207,8 +258,6 @@ def request_verify_email(email):
 
 @user_blueprint.route('/verify_email/<token>', methods=['GET', 'POST'])
 def verify_email(token):
-    if current_user.is_authenticated:
-        return redirect(url_for('main_blueprint.home'))
 
     user = User.verify_mail_token(token)
 
@@ -234,72 +283,100 @@ previous_email = ""
 
 
 @user_blueprint.route('/request_change_email/<email>', methods=['GET', 'POST'])
+@login_required
 def request_change_email(email):
     global new_email, previous_email
-    if current_user.is_email_verified and current_user.is_authenticated:
-        previous_email = current_user.email
-        form = RequestChangeEmailForm()
-        if form.validate_on_submit():
-            new_email = form.email.data
-            user = User.query.filter_by(email=previous_email).first()
-            send_change_email_link(user, new_email)
-            previous_email = ""
-            flash('An Email Has Been Sent To Your New Email. Kindly Check Your Email For Further Instructions.', 'success')
-            return redirect(url_for('user_blueprint.account'))
-        if request.method == 'GET':
-            form.email.data = email
-        return render_template("user/request_change_email.html", title="Request Change Email", form=form)
-
-    else:
-        flash(f"To Access this Page You Must Verify Your Email And Logged In.", 'warning')
-        return redirect(url_for('user_blueprint.login'))
+    previous_email = current_user.email
+    form = RequestChangeEmailForm()
+    if form.validate_on_submit():
+        new_email = form.email.data
+        user = User.query.filter_by(email=previous_email).first()
+        send_change_email_link(user, new_email)
+        previous_email = ""
+        flash('An Email Has Been Sent To Your New Email. Kindly Check Your Email For Further Instructions.', 'success')
+        return redirect(url_for('user_blueprint.account'))
+    if request.method == 'GET':
+        form.email.data = email
+    return render_template("user/request_change_email.html", title="Request Change Email", form=form)
 
 
 @user_blueprint.route('/change_email/<token>', methods=['GET', 'POST'])
+@login_required
 def change_email(token):
     global new_email
-    if current_user.is_email_verified and current_user.is_authenticated:
-        user = User.verify_mail_token(token)
+    user = User.verify_mail_token(token)
 
-        if user is None:
-            flash('That is an Invalid or Expired Token', 'warning')
-            return redirect(url_for('user_blueprint.request_change_email', email=""))
+    if user is None:
+        flash('That is an Invalid or Expired Token', 'warning')
+        return redirect(url_for('user_blueprint.request_change_email', email=""))
 
-        form = ChangeEmailForm()
-        if form.validate_on_submit():
-            user.email = new_email
-            db.session.commit()
-            new_email = ""
-            flash('Your Account Updated Successfully.', 'success')
-            return redirect(url_for('user_blueprint.account'))
-        elif request.method == 'POST' and not form.validate_on_submit():
-            flash('Your Email Verification Failed. Try Again.', 'danger')
-            return redirect(url_for('user_blueprint.request_change_email', email=user.email))
+    form = ChangeEmailForm()
+    if form.validate_on_submit():
+        user.email = new_email
+        db.session.commit()
+        new_email = ""
+        flash('Your Account Updated Successfully.', 'success')
+        return redirect(url_for('user_blueprint.account'))
+    elif request.method == 'POST' and not form.validate_on_submit():
+        flash('Your Email Verification Failed. Try Again.', 'danger')
+        return redirect(url_for('user_blueprint.request_change_email', email=user.email))
 
-        return render_template("user/change_email.html", title="Change Email", form=form, new_email=new_email)
-
-    else:
-        flash(f"To Access this Page You Must Verify Your Email And Logged In.", 'warning')
-        return redirect(url_for('user_blueprint.login'))
+    return render_template("user/change_email.html", title="Change Email", form=form, new_email=new_email)
 
 
 @user_blueprint.route("/change_password", methods=['GET', 'POST'])
+@login_required
 def change_password():
-    if current_user.is_email_verified and current_user.is_authenticated:
-        form = ChangePasswordForm()
-        if form.validate_on_submit():
-            user = current_user
-            if user and bcrypt.check_password_hash(user.password, form.current_password.data):
-                hashed_password = bcrypt.generate_password_hash(form.new_password.data).decode('utf-8')
-                user.password = hashed_password
-                db.session.commit()
-                flash("Your Password Changed Successfully.", 'success')
-                return redirect(url_for('user_blueprint.account'))
-            else:
-                flash("Password Change Failed, Try Again!", 'danger')
+    form = ChangePasswordForm()
+    if form.validate_on_submit():
+        user = current_user
+        if user and bcrypt.check_password_hash(user.password, form.current_password.data):
+            hashed_password = bcrypt.generate_password_hash(form.new_password.data).decode('utf-8')
+            user.password = hashed_password
+            db.session.commit()
+            flash("Your Password Changed Successfully.", 'success')
+            return redirect(url_for('user_blueprint.account'))
+        else:
+            flash("Password Change Failed, Try Again!", 'danger')
 
-        return render_template("user/change_password.html", title="Change Password", form=form)
+    return render_template("user/change_password.html", title="Change Password", form=form)
 
+
+@user_blueprint.route('/follow/<username>', methods=['POST'])
+@login_required
+def follow(username):
+    form = EmptyForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(username=username).first()
+        if user is None:
+            flash(f'User {username} not found.', 'danger')
+            return redirect(url_for('main_blueprint.home'))
+        if user == current_user:
+            flash('You cannot follow yourself!', 'warning')
+            return redirect(url_for('user_blueprint.user_public_profile', username=username))
+        current_user.follow(user)
+        db.session.commit()
+        flash(f'You are now following {username}.', 'success')
+        return redirect(url_for('user_blueprint.user_public_profile', username=username))
     else:
-        flash(f"To Access this Page You Must Verify Your Email And Logged In.", 'warning')
-        return redirect(url_for('user_blueprint.login'))
+        return redirect(url_for('main_blueprint.home'))
+
+
+@user_blueprint.route('/unfollow/<username>', methods=['POST'])
+@login_required
+def unfollow(username):
+    form = EmptyForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(username=username).first()
+        if user is None:
+            flash(f'User {username} not found.', 'danger')
+            return redirect(url_for('main_blueprint.home'))
+        if user == current_user:
+            flash('You cannot unfollow yourself!', 'warning')
+            return redirect(url_for('user_blueprint.user_public_profile', username=username))
+        current_user.unfollow(user)
+        db.session.commit()
+        flash(f'You have unfollowed {username}!', 'danger')
+        return redirect(url_for('user_blueprint.user_public_profile', username=username))
+    else:
+        return redirect(url_for('main_blueprint.home'))

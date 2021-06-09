@@ -7,6 +7,8 @@ from flask_bcrypt import Bcrypt
 from flask_mail import Mail
 from flask import Flask
 import os
+from flask_admin import Admin
+from flask_admin.contrib.sqla import ModelView
 
 
 UPLOAD_FOLDER = ""
@@ -28,6 +30,8 @@ mail = Mail()
 
 bootstrap = Bootstrap()
 
+admin = Admin()
+
 
 def create_app(config_class=Config):
     global UPLOAD_FOLDER
@@ -40,6 +44,7 @@ def create_app(config_class=Config):
     login_manager.init_app(app)
     mail.init_app(app)
     bootstrap.init_app(app)
+    admin.init_app(app)
 
     UPLOAD_FOLDER = os.path.join(app.root_path, 'static/MEDIA').replace("\\", "/")
 
@@ -55,6 +60,10 @@ def create_app(config_class=Config):
     app.register_blueprint(post_blueprint)
     app.register_blueprint(main_blueprint)
     app.register_blueprint(error_blueprint)
+
+    from flaskapp.models import User, Post
+    admin.add_view(ModelView(User, db.session))
+    admin.add_view(ModelView(Post, db.session))
 
     return app
 

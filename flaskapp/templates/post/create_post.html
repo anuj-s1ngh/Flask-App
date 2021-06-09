@@ -1,5 +1,5 @@
 {% extends "main/layout.html" %}
-
+{% import "bootstrap/wtf.html" as wtf %}
 {% block content %}
 
 <div>
@@ -9,7 +9,7 @@
             <legend class="border-bottom mb-4  mt-4"><strong>Create New Post</strong></legend>
 
             <div class="form-group">
-                {{ form.title.label(class="form-control-label mt-3") }}
+<!--                {{ form.title.label(class="form-control-label mt-3") }}-->
 
                 {% if form.title.errors %}
                 {{ form.title(class="form-control form-control-lg is-invalid") }}
@@ -19,12 +19,12 @@
                     {% endfor %}
                 </div>
                 {% else %}
-                {{ form.title(class="form-control form-control-lg") }}
+                    {{ wtf.form_field(form.title, class="form-control form-control-lg mb-3") }}
                 {% endif %}
             </div>
 
             <div class="form-group">
-                {{ form.content.label(class="form-control-label mt-3") }}
+<!--                {{ form.content.label(class="form-control-label mt-3") }}-->
 
                 {% if form.content.errors %}
                 {{ form.content(class="form-control form-control-lg is-invalid") }}
@@ -34,14 +34,14 @@
                     {% endfor %}
                 </div>
                 {% else %}
-                {{ form.content(class="form-control form-control-lg") }}
+                    {{ wtf.form_field(form.content, id="postContentTextAreaEditor", class="form-control form-control-lg mb-3") }}
                 {% endif %}
             </div>
 
         </fieldset>
 
         <div class="form-group">
-            {{ form.submit(class="btn btn-outline-primary mt-4 mb-3") }}
+            {{ form.submit(class="btn btn-outline-primary mt-4") }}
         </div>
 
     </form>

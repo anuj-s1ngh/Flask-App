@@ -1,6 +1,9 @@
 {% extends "main/layout.html" %}
 {% block content %}
-    <img class="rounded-circle mt-3" src="{{ url_for('static', filename='MEDIA/IMG/PROFILE_IMG/' + user.profile_image) }}">
+    <svg data-jdenticon-value="{{ current_user.username }}" width="125" height="125">
+            Fallback text or image for browsers not supporting inline svg.
+    </svg>
+<!--    <img class="rounded-circle mt-3" src="{{ url_for('static', filename='MEDIA/IMG/PROFILE_IMG/' + user.profile_image) }}">-->
     <h4 class="mb-3">
         <a class="link-info" href="{{ url_for('user_blueprint.user_public_profile', username=user.username) }}">
             @{{ user.username }}
