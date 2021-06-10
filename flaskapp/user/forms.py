@@ -1,7 +1,7 @@
 from flask_login import current_user
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, SelectField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 from flaskapp.models import User
 
@@ -39,9 +39,7 @@ class AccountForm(FlaskForm):
     about = StringField('About', validators=[Length(min=0, max=1000)])
     username = StringField('Username', validators=[DataRequired(), Length(min=2, max=200)])
     email = StringField('Email', validators=[DataRequired(), Email(), Length(min=6, max=200)])
-    first_name = StringField('First Name', validators=[Length(min=0, max=200)])
-    middle_name = StringField('Middle Name', validators=[Length(min=0, max=200)])
-    last_name = StringField('Last Name', validators=[Length(min=0, max=200)])
+    name = StringField('Name', validators=[Length(min=0, max=200)])
     current_profession = StringField('Current Profession', validators=[Length(min=0, max=200)])
     submit = SubmitField('Edit Profile')
 
@@ -51,10 +49,14 @@ class UpdateAccountForm(FlaskForm):
     about = StringField('About', validators=[Length(min=0, max=1000)])
     username = StringField('Username', validators=[DataRequired(), Length(min=2, max=200)])
     email = StringField('Email', validators=[DataRequired(), Email(), Length(min=6, max=200)])
-    first_name = StringField('First Name', validators=[Length(min=0, max=200)])
-    middle_name = StringField('Middle Name', validators=[Length(min=0, max=200)])
-    last_name = StringField('Last Name', validators=[Length(min=0, max=200)])
-    current_profession = StringField('Current Profession', validators=[Length(min=0, max=200)])
+    name = StringField('Name', validators=[Length(min=0, max=200)])
+    choices = [
+        None,
+        "Student",
+        "Professional",
+        "Other"
+    ]
+    current_profession = SelectField('Current Profession', choices=choices)
     submit = SubmitField('Update')
 
     def validate_username(self, username):
@@ -124,6 +126,14 @@ class ChangePasswordForm(FlaskForm):
 
 
 class CloseAccountForm(FlaskForm):
-    closing_reason = TextAreaField('Reason For Closing Account', validators=[DataRequired()])
+    choices = [
+        "Don't Like The Platform.",
+        "Privacy Concerns.",
+        "Security Reasons.",
+        "Want A Break.",
+        "Others"
+    ]
+    closing_reason = SelectField('Reason For Closing Account', validators=[DataRequired()], choices=choices)
+    suggestions = TextAreaField('Any Suggestions For Us', validators=[DataRequired()])
     confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), Length(min=4, max=50)])
     submit = SubmitField('Close Account')

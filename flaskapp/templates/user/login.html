@@ -2,7 +2,7 @@
 {% import "bootstrap/wtf.html" as wtf %}
 {% block content %}
     <div>
-        <form method="post" action="">
+        <form method="post" action="" autocomplete="on">
             {{ form.hidden_tag() }}
             <fieldset class="form-group">
                 <legend class="border-bottom mb-4  mt-4"><strong>Log In</strong></legend>
@@ -17,7 +17,7 @@
                             {% endfor %}
                         </div>
                     {% else %}
-                        {{ wtf.form_field(form.email, class="form-control form-control-lg mb-3", placeholder="Enter Your Email") }}
+                        {{ wtf.form_field(form.email, class="form-control form-control-lg mb-3", placeholder="Enter Your Email", autocomplete="email", type="email") }}
                     {% endif %}
 
                 </div>
@@ -32,7 +32,7 @@
                             {% endfor %}
                         </div>
                     {% else %}
-                        {{ wtf.form_field(form.password, class="form-control form-control-lg", placeholder="Enter Your Password") }}
+                        {{ wtf.form_field(form.password, class="form-control form-control-lg", placeholder="Enter Your Password", autocomplete="current-password", type="password") }}
                     {% endif %}
 
                 </div>

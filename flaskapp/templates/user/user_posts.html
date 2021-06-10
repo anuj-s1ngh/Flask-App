@@ -1,11 +1,14 @@
 {% extends "main/layout.html" %}
 {% block content %}
-    <svg data-jdenticon-value="{{ current_user.username }}" width="125" height="125">
+    {% if user.profile_image == "default.jpg" %}
+        <svg class="mb-3 mt-3" data-jdenticon-value="{{ user.profile_identicon_unique_string }}" width="125" height="125">
             Fallback text or image for browsers not supporting inline svg.
-    </svg>
-<!--    <img class="rounded-circle mt-3" src="{{ url_for('static', filename='MEDIA/IMG/PROFILE_IMG/' + user.profile_image) }}">-->
+        </svg>
+    {% else %}
+        <img class="rounded-0 mt-3" src="{{ url_for('static', filename='MEDIA/IMG/PROFILE_IMG/' + user.profile_image) }}">
+    {% endif %}
     <h4 class="mb-3">
-        <a class="link-info" href="{{ url_for('user_blueprint.user_public_profile', username=user.username) }}">
+        <a class="link-default" href="{{ url_for('user_blueprint.user_public_profile', username=user.username) }}">
             @{{ user.username }}
         </a>
     </h4>
@@ -18,7 +21,7 @@
                     <small class="text-muted">{{ post.date_posted.strftime("%Y-%m-%d") }}</small>
                 </div>
                 <H3><a class="article-title link-primary" href="{{ url_for('post_blueprint.see_post', post_id=post.id) }}"> {{ post.title }} </a></H3>
-                <p class="article-content">{{ post.content }}</p>
+                <h6 class="article-content">{{ post.content }}</h6>
             </div>
         </article>
         <br>

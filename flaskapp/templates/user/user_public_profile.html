@@ -1,18 +1,24 @@
 {% extends "main/layout.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
+
 {% block content %}
-    <img class="rounded-circle mt-3" src="{{ url_for('static', filename='MEDIA/IMG/PROFILE_IMG/' + user.profile_image) }}">
-    {% if user.first_name and user.middle_name and user.last_name %}
-        <h4>{{ user.first_name.capitalize() }} {{ user.middle_name.capitalize() }} {{ user.last_name.capitalize() }}</h4>
-    {% elif user.first_name and user.last_name %}
-        <h4>{{ user.first_name.capitalize() }} {{ user.last_name.capitalize() }}</h4>
+
+    {% if user.profile_image == "default.jpg" %}
+        <svg class="mb-3 mt-3" data-jdenticon-value="{{ user.profile_identicon_unique_string }}" width="125" height="125">
+            Fallback text or image for browsers not supporting inline svg.
+        </svg>
     {% else %}
-        <h4>@{{ user.username }}</h4>
+        <img class="rounded-0 mt-3 mb-3" src="{{ url_for('static', filename='MEDIA/IMG/PROFILE_IMG/' + user.profile_image) }}">
+    {% endif %}
+    <p class="text-muted mt-1">@{{ user.username }}</p>
+    {% if user.name %}
+        <h4>{{ user.name }}</h4>
     {% endif %}
     {% if user.about %}
         <p>{{ user.about }}</p>
     {% endif %}
-    <p class="text-muted mb-3">Date Joined : {{ user.date_joined.strftime("%Y-%m-%d") }}</p>
+    <p class="text-muted">Current Profession : {{ user.current_profession }}</p>
+    <p class="text-muted">Date Joined : {{ user.date_joined.strftime("%Y-%m-%d") }}</p>
     <p class="text-muted mb-3">Total Posts : {{ posts.total }}</p>
 
     {% if current_user.is_authenticated %}
@@ -45,6 +51,7 @@
         </article>
         <br>
     {% endfor %}
+
     {% for page_num in posts.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
         {% if page_num %}
             {% if posts.page == page_num %}
@@ -55,4 +62,5 @@
         {% else %}
         {% endif %}
     {% endfor %}
+
 {% endblock content %}

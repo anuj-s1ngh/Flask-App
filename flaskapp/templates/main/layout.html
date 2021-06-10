@@ -36,10 +36,10 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
             <ul class="nav navbar-nav ml-auto navbar-right">
-                <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="{{ url_for('main_blueprint.home') }}">Home</a>
-                </li>
                 {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="{{ url_for('main_blueprint.home') }}">My Feed</a>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('post_blueprint.create_post') }}">Create Post</a>
                     </li>
@@ -47,6 +47,9 @@
                         <a class="nav-link" href="{{ url_for('user_blueprint.account') }}">My Account</a>
                     </li>
                 {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="{{ url_for('main_blueprint.home') }}">Home</a>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('user_blueprint.register') }}">Register</a>
                     </li>

@@ -9,7 +9,7 @@ from flaskapp.user.forms import (RegistrationForm, LoginForm, UpdateAccountForm,
                                  EmptyForm)
 from flaskapp.models import User, Post
 from flaskapp.user.utils import allowed_file, save_profile_image, send_reset_password_link, send_verify_email_link, \
-    send_change_email_link
+    send_change_email_link, get_capitalized_name
 
 from flaskapp.config import posts_per_page
 from flaskapp.user.utils import get_random_string
@@ -38,11 +38,11 @@ def register():
         db.session.commit()
         login_user(user, remember=True)
 
-        flash(f'Account Created for {form.username.data.capitalize()}.', 'success')
+        flash(f'Account Created for {form.username.data}.', 'success')
         return redirect(url_for('user_blueprint.request_verify_email', email=form.email.data))
 
     elif request.method == 'POST':
-        flash(f'Account Creation Failed for {form.username.data.capitalize()}. Please, Try Again!', 'danger')
+        flash(f'Account creation failed for {form.username.data}. Please, Try Again!', 'danger')
 
     return render_template("user/register.html", title="Register", form=form)
 
@@ -54,8 +54,12 @@ def login():
         user = User.query.filter_by(email=form.email.data).first()
 
         if user and bcrypt.check_password_hash(user.password, form.password.data):
+            if not user.is_account_active:
+                user.is_account_active = True
+                db.session.commit()
+                flash("Your account is activated successfully.", 'success')
             login_user(user, remember=form.remember_me.data)
-            flash("You Are Now Logged In.", 'success')
+            flash("You are now logged in.", 'success')
             if user.is_email_verified:
                 next_page = request.args.get('next')
                 if next_page:
@@ -65,10 +69,10 @@ def login():
             else:
                 return redirect(url_for('user_blueprint.request_verify_email', email=form.email.data))
         else:
-            flash("Invalid Credentials. Please Try Again With Valid Credentials!", 'danger')
+            flash("Invalid credentials, Please try again with valid credentials!", 'danger')
 
     elif request.method == 'POST':
-        flash("Invalid Credentials. Please Try Again With Valid Credentials!", 'danger')
+        flash("Invalid credentials, Please try again with valid credentials!", 'danger')
 
     return render_template("user/login.html", title="Login", form=form)
 
@@ -76,46 +80,43 @@ def login():
 @user_blueprint.route('/logout')
 @login_required
 def logout():
-    if current_user.is_authenticated:
-        logout_user()
-        flash("You are Logged Out.", 'danger')
-        return redirect(url_for('main_blueprint.home'))
+    logout_user()
+    flash("You are Logged Out.", 'danger')
+    return redirect(url_for('main_blueprint.home'))
 
 
 @user_blueprint.route('/account', methods=['GET', 'POST'])
 @login_required
 def account():
-    if current_user.is_authenticated:
+    if current_user.is_account_active:
         form = AccountForm()
 
         if form.validate_on_submit():
             return redirect(url_for('user_blueprint.update_account'))
 
         if request.method == 'GET':
-            if current_user.first_name:
-                flash(f"Welcome {current_user.first_name.capitalize()}", 'success')
+            if current_user.name:
+                flash(f"Welcome {current_user.name}", 'success')
             else:
-                flash(f"Welcome {current_user.username.capitalize()}", 'success')
+                flash(f"Welcome {current_user.username}", 'success')
             form.about.data = current_user.about
             form.username.data = current_user.username
             form.email.data = current_user.email
-            form.first_name.data = current_user.first_name
-            form.middle_name.data = current_user.middle_name
-            form.last_name.data = current_user.last_name
+            form.name.data = current_user.name
             form.current_profession.data = current_user.current_profession
 
         image_file = url_for('static', filename=f'MEDIA/IMG/PROFILE_IMG/{current_user.profile_image}')
         return render_template("user/account.html", title="Account", image_file=image_file, form=form)
 
     else:
-        flash(f"To Access this Page You Must Logged In.", 'warning')
+        flash(f"To access this page you must activate your account and log in.", 'warning')
         return redirect(url_for('user_blueprint.login'))
 
 
 @user_blueprint.route('/account/update', methods=['GET', 'POST'])
 @login_required
 def update_account():
-    if current_user.is_authenticated:
+    if current_user.is_account_active:
         form = UpdateAccountForm()
 
         if form.validate_on_submit() and ((current_user.username != form.username.data) and (current_user.email != form.email.data) and (current_user.profile_image != form.profile_image.data)):
@@ -128,9 +129,7 @@ def update_account():
 
             current_user.about = form.about.data
             current_user.username = form.username.data
-            current_user.first_name = form.first_name.data
-            current_user.middle_name = form.middle_name.data
-            current_user.last_name = form.last_name.data
+            current_user.name = get_capitalized_name(form.name.data)
             current_user.current_profession = form.current_profession.data
             db.session.commit()
 
@@ -144,16 +143,14 @@ def update_account():
             flash(f"You Can Update Your Account Info From Here.", 'primary')
             form.username.data = current_user.username
             form.email.data = current_user.email
-            form.first_name.data = current_user.first_name
-            form.middle_name.data = current_user.middle_name
-            form.last_name.data = current_user.last_name
+            form.name.data = current_user.name
             form.current_profession.data = current_user.current_profession
 
         image_file = url_for('static', filename=f'MEDIA/IMG/PROFILE_IMG/{current_user.profile_image}')
         return render_template("user/update_account.html", title="Account", image_file=image_file, form=form)
 
     else:
-        flash(f"To Access this Page You Must Logged In", 'warning')
+        flash(f"To access this page you must activate your account and log in.", 'warning')
         return redirect(url_for('user_blueprint.login'))
 
 
@@ -165,7 +162,7 @@ def close_account():
         user = User.query.filter_by(email=current_user.email).first()
         posts = Post.query.filter_by(author=user).all()
         if request.method == "GET":
-            flash(f"Please note that after deletion of your account your all posts will also be deleted.", 'success')
+            flash(f"Please note that after deletion of your account your all posts will also be deleted.", 'danger')
             return render_template("user/close_account.html", title="Close Account", form=form)
         elif form.validate_on_submit() and user and bcrypt.check_password_hash(user.password, form.confirm_password.data):
             if posts:
@@ -182,6 +179,19 @@ def close_account():
     else:
         flash(f"To Access this Page You Must Logged In.", 'warning')
         return redirect(url_for('user_blueprint.login'))
+
+
+@user_blueprint.route('/account/disable', methods=['GET', 'POST'])
+@login_required
+def disable_account():
+    if current_user.is_account_active:
+        current_user.is_account_active = False
+        db.session.commit()
+        logout_user()
+        flash("Your account is disabled, you can enable it again by logging in.", "danger")
+        return redirect(url_for("main_blueprint.home"))
+    flash("Your account is disabled, you can enable it again by logging in.", "danger")
+    return redirect(url_for("user_blueprint.login"))
 
 
 @user_blueprint.route("/user/<string:username>/posts")

@@ -3,15 +3,16 @@
 {% block content %}
 <div class="content-section mt-3">
     <div class="media">
-        <svg data-jdenticon-value="{{ current_user.profile_identicon_unique_string }}" width="125" height="125">
-            Fallback text or image for browsers not supporting inline svg.
-        </svg>
-<!--        <img class="rounded-circle account-img mb-3" src="{{ image_file }}">-->
-        <div class="media-body">
-            {% if current_user.first_name and current_user.middle_name and current_user.last_name %}
-                <h4>{{ current_user.first_name.capitalize() }} {{ current_user.middle_name.capitalize() }} {{ current_user.last_name.capitalize() }}</h4>
-            {% elif current_user.first_name and current_user.last_name %}
-                <h4>{{ current_user.first_name.capitalize() }} {{ current_user.last_name.capitalize() }}</h4>
+        {% if current_user.profile_image == "default.jpg" %}
+            <svg class="mb-3" data-jdenticon-value="{{ current_user.profile_identicon_unique_string }}" width="125" height="125">
+                Fallback text or image for browsers not supporting inline svg.
+            </svg>
+        {% else %}
+        <img class="rounded-0 account-img mb-3" src="{{ image_file }}">
+        {% endif %}
+        <div class="media-body mb-3">
+            {% if current_user.name %}
+                <h4>{{ current_user.name }}</h4>
             {% else %}
                 <h4>@{{ current_user.username }}</h4>
             {% endif %}
@@ -22,11 +23,11 @@
     </div>
     <div>
         {% if not current_user.is_email_verified %}
-            <a class="btn btn-secondary" href="{{ url_for('user_blueprint.request_verify_email', email=current_user.email) }}">
+            <a class="btn btn-secondary m-1 mt-3 mb-3" href="{{ url_for('user_blueprint.request_verify_email', email=current_user.email) }}">
                 Verify Email
             </a>
         {% endif %}
-        <a class="btn btn-danger" href="{{ url_for('user_blueprint.logout') }}">
+        <a class="btn btn-danger m-1 mt-3 mb-3" href="{{ url_for('user_blueprint.logout') }}">
             Logout
         </a>
 
@@ -68,50 +69,17 @@
                 </div>
 
                 <div class="form-group">
-<!--                    {{ form.first_name.label(class="form-control-label mt-3") }}-->
+<!--                    {{ form.name.label(class="form-control-label mt-3") }}-->
 
-                    {% if form.first_name.errors %}
-                    {{ form.first_name(class="form-control form-control-lg is-invalid") }}
+                    {% if form.name.errors %}
+                    {{ form.name(class="form-control form-control-lg is-invalid") }}
                     <div class="invalid-feedback">
-                        {% for error in form.first_name.errors %}
+                        {% for error in form.name.errors %}
                             <span>{{ error }}</span>
                         {% endfor %}
                     </div>
                     {% else %}
-                        {{ wtf.form_field(form.first_name, class="form-control form-control-lg read_only mb-3") }}
-                    {% endif %}
-
-                </div>
-
-                {% if current_user.middle_name != "" %}
-                    <div class="form-group">
-    <!--                    {{ form.middle_name.label(class="form-control-label mt-3") }}-->
-
-                        {% if form.middle_name.errors %}
-                        {{ form.middle_name(class="form-control form-control-lg is-invalid") }}
-                        <div class="invalid-feedback">
-                            {% for error in form.middle_name.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                        {% else %}
-                            {{ wtf.form_field(form.middle_name, class="form-control form-control-lg read_only mb-3") }}
-                        {% endif %}
-                    </div>
-                {% endif %}
-
-                <div class="form-group">
-<!--                    {{ form.last_name.label(class="form-control-label mt-3") }}-->
-
-                    {% if form.last_name.errors %}
-                    {{ form.last_name(class="form-control form-control-lg is-invalid") }}
-                    <div class="invalid-feedback">
-                        {% for error in form.last_name.errors %}
-                            <span>{{ error }}</span>
-                        {% endfor %}
-                    </div>
-                    {% else %}
-                        {{ wtf.form_field(form.last_name, class="form-control form-control-lg read_only mb-3") }}
+                        {{ wtf.form_field(form.name, class="form-control form-control-lg read_only mb-3") }}
                     {% endif %}
 
                 </div>
@@ -138,6 +106,9 @@
                 {{ form.submit(class="btn btn-outline-primary m-1 mt-4 mb-4") }}
                 <a class="btn btn-outline-secondary m-1 mt-3 mb-3" href="{{ url_for('user_blueprint.change_password') }}">
                     Change Password
+                </a>
+                <a class="btn btn-outline-warning m-1 mt-3 mb-3" href="{{ url_for('user_blueprint.disable_account') }}">
+                    Disable Account
                 </a>
                 <a class="btn btn-outline-danger m-1 mt-3 mb-3" href="{{ url_for('user_blueprint.close_account') }}">
                     Close Account

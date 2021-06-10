@@ -3,10 +3,22 @@
 {% block content %}
 <div class="content-section mt-3">
     <div class="media">
-        <img class="rounded-circle account-img" src="{{ image_file }}">
+        {% if current_user.profile_image == "default.jpg" %}
+        <svg class="mb-3" data-jdenticon-value="{{ current_user.profile_identicon_unique_string }}" width="125" height="125">
+            Fallback text or image for browsers not supporting inline svg.
+        </svg>
+        {% else %}
+            <img class="rounded-0 account-img" src="{{ image_file }}">
+        {% endif %}
         <div class="media-body">
-            <h3>@{{ current_user.username }}</h3>
-            <p>{{ current_user.email }}</p>
+            {% if current_user.name %}
+                <h4>{{ current_user.name }}</h4>
+            {% else %}
+                <h4>@{{ current_user.username }}</h4>
+            {% endif %}
+            {% if current_user.about %}
+                <p>{{ current_user.about }}</p>
+            {% endif %}
         </div>
     </div>
     <div>
@@ -78,47 +90,16 @@
                 </div>
 
                 <div class="form-group">
-<!--                    {{ form.first_name.label(class="form-control-label mt-3") }}-->
-
-                    {% if form.first_name.errors %}
-                        {{ wtf.form_field(form.first_name, class="form-control form-control-lg mb-3 is-invalid") }}
+<!--                    {{ form.name.label(class="form-control-label mt-3") }}-->
+                    {% if form.name.errors %}
+                        {{ wtf.form_field(form.name, class="form-control form-control-lg mb-3 is-invalid") }}
                     <div class="invalid-feedback">
-                        {% for error in form.first_name.errors %}
+                        {% for error in form.name.errors %}
                             <span>{{ error }}</span>
                         {% endfor %}
                     </div>
                     {% else %}
-                        {{ wtf.form_field(form.first_name, class="form-control form-control-lg mb-3") }}
-                    {% endif %}
-                </div>
-
-                <div class="form-group">
-<!--                    {{ form.middle_name.label(class="form-control-label mt-3") }}-->
-
-                    {% if form.middle_name.errors %}
-                        {{ wtf.form_field(form.middle_name, class="form-control form-control-lg mb-3 is-invalid") }}
-                    <div class="invalid-feedback">
-                        {% for error in form.middle_name.errors %}
-                            <span>{{ error }}</span>
-                        {% endfor %}
-                    </div>
-                    {% else %}
-                        {{ wtf.form_field(form.middle_name, class="form-control form-control-lg mb-3") }}
-                    {% endif %}
-                </div>
-
-                <div class="form-group">
-<!--                    {{ form.last_name.label(class="form-control-label mt-3") }}-->
-
-                    {% if form.last_name.errors %}
-                        {{ wtf.form_field(form.last_name, class="form-control form-control-lg mb-3 is-invalid") }}
-                    <div class="invalid-feedback">
-                        {% for error in form.last_name.errors %}
-                            <span>{{ error }}</span>
-                        {% endfor %}
-                    </div>
-                    {% else %}
-                        {{ wtf.form_field(form.last_name, class="form-control form-control-lg mb-3") }}
+                        {{ wtf.form_field(form.name, class="form-control form-control-lg mb-3") }}
                     {% endif %}
                 </div>
 
@@ -126,14 +107,14 @@
 <!--                    {{ form.current_profession.label(class="form-control-label mt-3") }}-->
 
                     {% if form.current_profession.errors %}
-                        {{ wtf.form_field(form.current_profession, class="form-control form-control-lg mb-3 is-invalid") }}
+                        {{ wtf.form_field(form.current_profession, value=form.current_profession.data, class="form-select form-select-lg mb-3 is-invalid") }}
                     <div class="invalid-feedback">
                         {% for error in form.current_profession.errors %}
                             <span>{{ error }}</span>
                         {% endfor %}
                     </div>
                     {% else %}
-                        {{ wtf.form_field(form.current_profession, class="form-control form-control-lg mb-3") }}
+                        {{ wtf.form_field(form.current_profession, value=form.current_profession.data, class="form-select form-select-lg mb-3") }}
                     {% endif %}
                 </div>
 

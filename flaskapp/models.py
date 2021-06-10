@@ -3,7 +3,7 @@ from flaskapp import db, login_manager
 from flask_login import UserMixin
 import datetime as dt
 from flask import current_app
-from flaskapp.user.utils import get_random_string, generate_gravatar
+from flaskapp.user.utils import get_random_string
 
 
 @login_manager.user_loader
@@ -23,16 +23,15 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(200), unique=True, nullable=False)
     email = db.Column(db.String(200), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
-    first_name = db.Column(db.String(200), default=None)
-    middle_name = db.Column(db.String(200), default=None)
-    last_name = db.Column(db.String(200), default=None)
+    name = db.Column(db.String(200), default=None)
     current_profession = db.Column(db.String(200), default=None)
     about = db.Column(db.String(1000), default=None)
     last_active = db.Column(db.DateTime, nullable=False, default=dt.datetime.now())
     profile_image = db.Column(db.String(500), nullable=False, default='default.jpg')
-    profile_identicon_unique_string = db.Column(db.String(64), unique=True, nullable=False, default=get_random_string())
-    is_email_verified = db.Column(db.Boolean(), nullable=False, default=False)
+    profile_identicon_unique_string = db.Column(db.String(64), unique=True, nullable=False)
     date_joined = db.Column(db.DateTime, nullable=False, default=dt.datetime.now())
+    is_email_verified = db.Column(db.Boolean(), nullable=False, default=False)
+    is_account_active = db.Column(db.Boolean(), nullable=False, default=True)
 
     posts = db.relationship('Post', backref=db.backref('author', lazy=True))
 

@@ -2,11 +2,14 @@
 {% block content %}
 <article class="media content-section mt-3">
     <div class="media-body">
-<!--        <svg data-jdenticon-value="{{ current_user.username }}" width="80" height="80">-->
-<!--            Fallback text or image for browsers not supporting inline svg.-->
-<!--        </svg>-->
-        <img class="rounded-circle article-img"
-             src="{{ url_for('static', filename='MEDIA/IMG/PROFILE_IMG/' + post.author.profile_image) }}">
+        {% if post.author.profile_image == "default.jpg" %}
+            <svg class="mb-1" data-jdenticon-value="{{ post.author.profile_identicon_unique_string }}" width="80" height="80">
+                Fallback text or image for browsers not supporting inline svg.
+            </svg>
+        {% else %}
+            <img class="rounded-0 article-img"
+                 src="{{ url_for('static', filename='MEDIA/IMG/PROFILE_IMG/' + post.author.profile_image) }}">
+        {% endif %}
         <div class="article-metadata mb-1">
             <a class="mr-3" href="{{ url_for('user_blueprint.user_public_profile', username=post.author.username) }}">@{{ post.author.username }}</a>
             <small class="text-muted">{{ post.date_posted.strftime("%Y-%m-%d") }}</small>

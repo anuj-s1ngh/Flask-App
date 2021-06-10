@@ -2,7 +2,7 @@
 {% import "bootstrap/wtf.html" as wtf %}
 {% block content %}
     <div>
-        <form method="post" action="">
+        <form method="post" action="" autocomplete="on">
             {{ form.hidden_tag() }}
             <fieldset class="form-group">
                 <legend class="border-bottom mb-4  mt-4"><strong>Contact Us</strong></legend>
@@ -10,14 +10,14 @@
 <!--                    {{ form.name.label(class="form-control-label mt-3") }}-->
 
                     {% if form.name.errors %}
-                        {{ form.name(class="form-control form-control is-invalid") }}
+                        {{ form.name(class="form-control form-control-lg is-invalid") }}
                         <div class="invalid-feedback">
                             {% for error in form.name.errors %}
                                 <span>{{ error }}</span>
                             {% endfor %}
                         </div>
                     {% else %}
-                        {{ wtf.form_field(form.name, class="form-control form-control mb-3", placeholder="Enter Your Name") }}
+                        {{ wtf.form_field(form.name, class="form-control form-control-lg mb-3", placeholder="Enter Your Name", autocomplete="name") }}
                     {% endif %}
 
                 </div>
@@ -25,14 +25,14 @@
 <!--                    {{ form.email.label(class="form-control-label mt-3") }}-->
 
                     {% if form.email.errors %}
-                        {{ form.email(class="form-control form-control is-invalid") }}
+                        {{ form.email(class="form-control form-control-lg is-invalid") }}
                         <div class="invalid-feedback">
                             {% for error in form.email.errors %}
                                 <span>{{ error }}</span>
                             {% endfor %}
                         </div>
                     {% else %}
-                        {{ wtf.form_field(form.email, class="form-control form-control mb-3", placeholder="Enter Your Email") }}
+                        {{ wtf.form_field(form.email, class="form-control form-control-lg mb-3", placeholder="Enter Your Email", autocomplete="email") }}
                     {% endif %}
 
                 </div>
@@ -40,14 +40,14 @@
 <!--                    {{ form.subject.label(class="form-control-label mt-3") }}-->
 
                     {% if form.subject.errors %}
-                        {{ form.subject(class="form-control form-control is-invalid") }}
+                        {{ form.subject(class="form-control form-control-lg is-invalid") }}
                         <div class="invalid-feedback">
                             {% for error in form.subject.errors %}
                                 <span>{{ error }}</span>
                             {% endfor %}
                         </div>
                     {% else %}
-                        {{ wtf.form_field(form.subject, class="form-control form-control mb-3", placeholder="Enter Your Message Subject") }}
+                        {{ wtf.form_field(form.subject, class="form-control form-control-lg mb-3", placeholder="Enter Your Message Subject") }}
                     {% endif %}
 
                 </div>
@@ -55,14 +55,14 @@
 <!--                    {{ form.message.label(class="form-control-label mt-3") }}-->
 
                     {% if form.message.errors %}
-                        {{ form.message(class="form-control form-control is-invalid") }}
+                        {{ form.message(class="form-control form-control-lg is-invalid") }}
                         <div class="invalid-feedback">
                             {% for error in form.message.errors %}
                                 <span>{{ error }}</span>
                             {% endfor %}
                         </div>
                     {% else %}
-                        {{ wtf.form_field(form.message, class="form-control form-control mb-3", placeholder="Enter Your Message") }}
+                        {{ wtf.form_field(form.message, class="form-control form-control-lg mb-3", placeholder="Enter Your Message") }}
                     {% endif %}
 
                 </div>

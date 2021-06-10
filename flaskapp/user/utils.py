@@ -1,4 +1,3 @@
-# import code for encoding urls and generating md5 hashes
 import hashlib
 import os
 import secrets
@@ -13,6 +12,13 @@ from flask_mail import Message
 from werkzeug.utils import secure_filename
 
 from flaskapp import ALLOWED_EXTENSIONS, mail
+
+
+def get_capitalized_name(name):
+    capitalized_name = ""
+    for i in name.split(" "):
+        capitalized_name += i.capitalize() + " "
+    return capitalized_name[:-1]
 
 
 def generate_gravatar(random_string=None):
