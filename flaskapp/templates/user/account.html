@@ -2,15 +2,17 @@
 {% import "bootstrap/wtf.html" as wtf %}
 {% block content %}
 <div class="content-section mt-3">
-    <div class="media">
-        {% if current_user.profile_image == "default.jpg" %}
-            <svg class="mb-3" data-jdenticon-value="{{ current_user.profile_identicon_unique_string }}" width="125" height="125">
-                Fallback text or image for browsers not supporting inline svg.
-            </svg>
-        {% else %}
-        <img class="rounded-0 account-img mb-3" src="{{ image_file }}">
-        {% endif %}
-        <div class="media-body mb-3">
+    <div class="media d-flex justify-content-start">
+        <div class="">
+            {% if current_user.profile_image == "default.jpg" %}
+                <svg class="mb-3" data-jdenticon-value="{{ current_user.profile_identicon_unique_string }}" width="125" height="125">
+                    Fallback text or image for browsers not supporting inline svg.
+                </svg>
+            {% else %}
+            <img class="rounded-0 account-img mb-3" src="{{ image_file }}">
+            {% endif %}
+        </div>
+        <div class="media-body mb-3 p-4">
             {% if current_user.name %}
                 <h4>{{ current_user.name }}</h4>
             {% else %}
@@ -20,17 +22,18 @@
                 <p>{{ current_user.about }}</p>
             {% endif %}
         </div>
+        <div class="p-4">
+            {% if not current_user.is_email_verified %}
+                <a class="btn btn-secondary m-1 mt-3 mb-3" href="{{ url_for('user_blueprint.request_verify_email', email=current_user.email) }}">
+                    Verify Email
+                </a>
+            {% endif %}
+            <a class="btn btn-danger m-1 mt-3 mb-3" href="{{ url_for('user_blueprint.logout') }}">
+                Logout
+            </a>
+        </div>
     </div>
     <div>
-        {% if not current_user.is_email_verified %}
-            <a class="btn btn-secondary m-1 mt-3 mb-3" href="{{ url_for('user_blueprint.request_verify_email', email=current_user.email) }}">
-                Verify Email
-            </a>
-        {% endif %}
-        <a class="btn btn-danger m-1 mt-3 mb-3" href="{{ url_for('user_blueprint.logout') }}">
-            Logout
-        </a>
-
         <form method="post" action="">
             {{ form.hidden_tag() }}
             <fieldset class="form-group">
