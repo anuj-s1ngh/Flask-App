@@ -1,6 +1,6 @@
 # Flask-Blog-App
 
-This is flask app of a blog website with features like:
+This flask app have features like:
 1) register
 2) email confimation 
 3) login
