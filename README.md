@@ -9,7 +9,8 @@ This is flask app of a blog website with features like:
 6) random identicon generator by default for new users
 7) profile info update
 8) email update after verification of new email
-8) crete, read , update, delete posts
+9) Disable Account/ Delete Account
+10) crete, read , update, delete posts
 etc.
 
 this is part of my learning process.
