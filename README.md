@@ -1,5 +1,7 @@
 # Flask-Blog-App
 
+![Screenshot (96)](https://user-images.githubusercontent.com/62144435/133022972-4829203c-a860-46db-9c75-7b0fd1cdf595.png)
+
 This flask app have features like:
 1) register
 2) email confimation 
@@ -10,7 +12,8 @@ This flask app have features like:
 7) profile info update
 8) email update after verification of new email
 9) Disable Account/ Delete Account
-10) crete, read , update, delete posts
+10) create, read , update, delete posts
+
 etc.
 
 this is part of my learning process.
